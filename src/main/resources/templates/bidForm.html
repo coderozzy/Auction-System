@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Place Bid</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        :root {
+            --bs-primary: #4CAF50; /* Green */
+            --bs-primary-rgb: 76, 175, 80;
+            --bs-secondary: #FF9800; /* Orange */
+            --bs-secondary-rgb: 255, 152, 0;
+            --bs-danger: #F44336; /* Red */
+            --bs-danger-rgb: 244, 67, 54;
+            --bs-dark: #212121; /* Dark Gray */
+            --bs-dark-rgb: 33, 33, 33;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        .nav-link {
+            color: #ffffff;
+        }
+        .nav-link:hover {
+            color: #adb5bd;
+        }
+        .text-center a {
+            color: var(--bs-primary);
+        }
+        .text-center a:hover {
+            color: #388E3C; /* Darker shade of primary color */
+            text-decoration: none;
+        }
+        .alert-danger {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Auction System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item" th:if="${username == null}">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item" th:if="${username == null}">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+                <li class="nav-item" th:if="${username != null}">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item" th:if="${username != null}">
+                    <a class="nav-link" href="/user">Profile</a>
+                </li>
+                <li class="nav-item" th:if="${username != null}">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h1 class="text-center">Place Bid</h1>
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <form id="bidForm">
+                <input type="hidden" id="auctionId" name="auctionId" th:value="${auction.id}" />
+                <input type="hidden" id="bidId" name="bidId" th:value="${bid.id}" />
+                <div class="form-group">
+                    <label for="amount">Bid Amount</label>
+                    <input type="number" step="0.01" class="form-control" id="amount" name="amount" th:field="${bid.amount}" required>
+                </div>
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" class="form-control" id="cardNumber" name="cardNumber"  pattern="\d{16}" title="16 digit card number" required>
+                </div>
+                <input type="hidden" id="username" name="username" th:value="${username}" />
+                <button type="button" class="btn btn-primary mt-3 w-100" onclick="submitBid()">Place Bid</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+CZ7VrY1I5UydT5W1CX3mY5bzhb3/"
+        crossorigin="anonymous"></script>
+<script>
+    function submitBid() {
+        const auctionId = document.getElementById('auctionId').value;
+        const amount = document.getElementById('amount').value;
+        const cardNumber = document.getElementById('cardNumber').value;
+        const username = document.getElementById('username').value;
+        const bidId = document.getElementById('bidId').value;
+
+        fetch('/api/payments/pay', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                auctionId: auctionId,
+                amount: amount,
+                cardNumber: cardNumber,
+                username: username,
+                bidId: bidId
+            })
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                // Redirect to another page or refresh the current page
+                window.location.href = '/';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Payment failed');
+            });
+    }
+</script>
+</body>
+</html>
